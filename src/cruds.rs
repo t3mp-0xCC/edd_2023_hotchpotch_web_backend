@@ -9,8 +9,10 @@ use diesel::{
 use uuid::Uuid;
 
 use crate::db::establish_connection;
-use crate::models::{self, Event, Join, Request, User, Solo, NewEvent, NewJoin, NewRequest, NewUser, NewSolo};
-use crate::schema::{self, events, joins, requests, users, solos};
+use crate::models::{self, Event, Join, Request, User, Solo, Team, NewEvent, NewJoin, NewRequest, NewUser, NewSolo, NewTeam};
+use crate::schema::solos::event_id;
+use crate::schema::teams::reader_id;
+use crate::schema::{self, events, joins, requests, users, solos, teams};
 
 // Create
 pub fn create_event (
@@ -78,6 +80,22 @@ pub fn create_solo (
         .values(&new_solo)
         .execute(conn)
         .with_context(|| "Failed to insert new_solo")?;
+    Ok(())
+}
+
+pub fn create_team (
+    event_id: &Uuid,
+    reader_id: &Uuid,
+    name: &String,
+    desc: &String
+) -> anyhow::Result<()> {
+    let conn = &mut establish_connection()?;
+    let new_team = NewTeam{event_id, reader_id, name, desc};
+    insert_into(solos::dsl::solos)
+        .values(&new_team)
+        .execute(conn)
+        .with_context(|| "Failed to insert new_team")?;
+  
     Ok(())
 }
 
