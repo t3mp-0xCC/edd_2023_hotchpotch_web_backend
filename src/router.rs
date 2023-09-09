@@ -144,8 +144,21 @@ async fn get_solo(query: web::Query<EventIdQuery>) -> Result<HttpResponse, Error
 }
 
 #[post("/api/teams")]
-async fn create_team(body: web::Json<CreateTeamReqBody>) -> Result<HttpResponse, Error> {
-    Ok(HttpResponse::Ok().content_type("text/html").body("0w0"))
+async fn create_team(req: HttpRequest, body: web::Json<CreateTeamReqBody>) -> Result<HttpResponse, Error> {
+    match auth::parse_token(req) {
+        Some(token) => {
+            match auth::verification(token).await {
+                Ok(user_data) => {
+                    match cruds::create_team(&body.event_id, &user_data.login, &body.name, &body.desc) {
+                        Ok(_) => return Ok(HttpResponse::Created().content_type("text/html").body("0w0")),
+                        Err(_) => return Ok(HttpResponse::InternalServerError().finish())
+                    };
+                },
+                Err(_) => return Ok(HttpResponse::Unauthorized().finish())
+            }
+        },
+        None => return Ok(HttpResponse::Unauthorized().finish())
+    };
 }
 
 #[get("/api/teams")]

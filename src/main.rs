@@ -29,6 +29,7 @@ async fn main() -> std::io::Result<()> {
             .service(router::create_user)
             .service(router::create_event)
             .service(router::create_solo)
+            .service(router::create_team)
     })
     .bind(("127.0.0.1", 8080))?
     .run()
