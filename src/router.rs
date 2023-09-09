@@ -9,3 +9,5 @@ use actix_web::{
 async fn index() -> Result<HttpResponse, Error> {
     Ok(HttpResponse::Ok().content_type("text/html").body("0w0"))
 }
+
+// API
