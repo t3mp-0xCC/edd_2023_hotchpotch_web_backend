@@ -44,7 +44,7 @@ struct CreateJoinReqBody {
 #[derive(Deserialize)]
 struct CreateRequestReqBody {
     team_id: String,
-    reciever_id: String,
+    user_id: String,
     message: String,
 }
 
