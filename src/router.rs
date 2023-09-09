@@ -93,7 +93,7 @@ async fn get_user(query: web::Query<UserIdQuery>) -> Result<HttpResponse, Error>
 }
 
 #[post("/api/events")]
-async fn create_event(req: HttpRequest , body: web::Json<CreateEventReqBody>) -> Result<HttpResponse, Error> {
+async fn create_event(req: HttpRequest, body: web::Json<CreateEventReqBody>) -> Result<HttpResponse, Error> {
     match auth::parse_token(req) {
         Some(token) => {
             match auth::verification(token).await {
@@ -121,8 +121,21 @@ async fn delete_event(query: web::Query<EventIdQuery>) -> Result<HttpResponse, E
 }
 
 #[post("/api/solos")]
-async fn create_solo(body: web::Query<CreateSoloReqBody>) -> Result<HttpResponse, Error> {
-    Ok(HttpResponse::Ok().content_type("text/html").body("0w0"))
+async fn create_solo(req: HttpRequest, body: web::Query<CreateSoloReqBody>) -> Result<HttpResponse, Error> {
+    match auth::parse_token(req) {
+        Some(token) => {
+            match auth::verification(token).await {
+                Ok(user_data) => {
+                    match cruds::create_solo(&body.event_id, &user_data.login) {
+                        Ok(_) => return Ok(HttpResponse::Created().content_type("text/html").body("0w0")),
+                        Err(_) => return Ok(HttpResponse::InternalServerError().finish())
+                    };
+                },
+                Err(_) => return Ok(HttpResponse::Unauthorized().finish())
+            }
+        },
+        None => return Ok(HttpResponse::Unauthorized().finish())
+    };
 }
 
 #[get("/api/solos")]
