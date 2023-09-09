@@ -101,3 +101,25 @@ pub struct  NewSolo<'a> {
     pub user_id: &'a Uuid,
 }
 
+#[derive(Queryable, Serialize, Identifiable, Selectable, PartialEq, Debug, Clone)]
+#[diesel(table_name = teams)]
+pub struct Team {
+    pub id: Uuid,
+    pub event_id: Uuid,
+    pub reader_id: Uuid,
+    pub name: String,
+    pub desc: String,
+    pub created_at: NaiveDateTime,
+    pub updated_at: NaiveDateTime,
+}
+
+#[derive(Insertable)]
+#[diesel(table_name = teams)]
+pub struct  NewTeam<'a> {
+    pub event_id: &'a Uuid,
+    pub reader_id: &'a Uuid,
+    pub name: &'a String,
+    pub desc: &'a String,
+}
+
+
