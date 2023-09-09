@@ -3,8 +3,11 @@ use actix_web::{
     get, post, delete,
     Error,
     HttpResponse,
+    HttpRequest,
 };
 use serde::Deserialize;
+
+use crate::{auth, cruds};
 
 #[get("/")]
 async fn index() -> Result<HttpResponse, Error> {
@@ -65,8 +68,14 @@ struct TeamIdQuery {
 
 // API
 #[post("/api/users")]
-async fn create_user(body: web::Json<CreateUserReqBody>) -> Result<HttpResponse, Error> {
-    Ok(HttpResponse::Ok().content_type("text/html").body("0w0"))
+async fn create_user(req: HttpRequest, body: web::Json<CreateUserReqBody>) -> Result<HttpResponse, Error> {
+    match auth::parse_token(req) {
+        Some(token) => {
+            println!("token: {}", token);
+            return Ok(HttpResponse::Ok().content_type("text/html").body("0w0"))
+        },
+        None => return Ok(HttpResponse::Unauthorized().finish())
+    };
 }
 
 #[get("api/users")]
