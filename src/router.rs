@@ -75,7 +75,7 @@ async fn create_user(req: HttpRequest) -> Result<HttpResponse, Error> {
                         Err(_) => return Ok(HttpResponse::InternalServerError().finish())
                     };
                 },
-                Err(_) => return Ok(HttpResponse::InternalServerError().finish())
+                Err(_) => return Ok(HttpResponse::Unauthorized().finish())
             }
         },
         None => return Ok(HttpResponse::Unauthorized().finish())
