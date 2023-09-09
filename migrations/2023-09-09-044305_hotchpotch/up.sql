@@ -6,6 +6,7 @@ CREATE TABLE "users" (
   "id" Uuid PRIMARY KEY DEFAULT (uuid_generate_v4()),
   "name" varchar(100) NOT NULL,
   "icon_url" varchar(400),
+  "profile" varchar(400),
   "created_at" timestamp NOT NULL DEFAULT (now()),
   "updated_at" timestamp NOT NULL DEFAULT (now())
 );
@@ -32,6 +33,7 @@ CREATE TABLE "teams" (
   "event_id" Uuid NOT NULL,
   "reader_id" Uuid NOT NULL,
   "name" varchar(100) NOT NULL,
+  "desc" varchar(400),
   "created_at" timestamp NOT NULL DEFAULT (now()),
   "updated_at" timestamp NOT NULL DEFAULT (now())
 );
@@ -47,6 +49,7 @@ CREATE TABLE "joins" (
 CREATE TABLE "requests" (
   "team_id" Uuid,
   "user_id" Uuid,
+  "message" varchar(400),
   "created_at" timestamp NOT NULL DEFAULT (now()),
   "updated_at" timestamp NOT NULL DEFAULT (now()),
   PRIMARY KEY ("team_id", "user_id")

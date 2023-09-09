@@ -10,6 +10,7 @@ use crate::schema::{
     requests,
     teams,
     users,
+    solos,
 };
 
 #[derive(Queryable, Serialize, Identifiable, Selectable, PartialEq, Debug, Clone)]
@@ -52,6 +53,7 @@ pub struct  NewJoin<'a> {
 pub struct Request {
     pub team_id: Uuid,
     pub user_id: Uuid,
+    pub message: String,
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
 }
@@ -61,6 +63,7 @@ pub struct Request {
 pub struct  NewRequest<'a> {
     pub team_id: &'a Uuid,
     pub user_id: &'a Uuid,
+    pub message: &'a String,
 }
 
 #[derive(Queryable, Serialize, Identifiable, Selectable, PartialEq, Debug, Clone)]
@@ -69,6 +72,7 @@ pub struct User {
     pub id: Uuid,
     pub name: String,
     pub icon_url: String,
+    pub profile: String,
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
 }
@@ -78,6 +82,7 @@ pub struct User {
 pub struct  NewUser<'a> {
     pub name: &'a String,
     pub icon_url: &'a String,
+    pub profile: &'a String,
 }
 
 #[derive(Queryable, Serialize, Selectable, PartialEq, Debug, Clone)]
