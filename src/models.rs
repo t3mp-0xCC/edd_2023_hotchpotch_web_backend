@@ -87,7 +87,7 @@ pub struct  NewUser<'a> {
 
 #[derive(Queryable, Serialize, Selectable, PartialEq, Debug, Clone)]
 #[diesel(table_name = solos)]
-pub struct solos {
+pub struct Solo {
     pub event_id: Uuid,
     pub user_id: Uuid,
     pub created_at: NaiveDateTime,
