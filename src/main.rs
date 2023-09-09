@@ -9,6 +9,7 @@ use env_logger::Env;
 
 mod db;
 mod router;
+mod schema;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
