@@ -8,6 +8,7 @@ use dotenv::dotenv;
 use env_logger::Env;
 
 mod db;
+mod models;
 mod router;
 mod schema;
 
