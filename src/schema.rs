@@ -24,6 +24,7 @@ diesel::table! {
     requests (team_id, user_id) {
         team_id -> Uuid,
         user_id -> Uuid,
+        message -> Nullable<Varchar>,
         created_at -> Timestamp,
         updated_at -> Timestamp,
     }
@@ -44,6 +45,7 @@ diesel::table! {
         event_id -> Uuid,
         reader_id -> Uuid,
         name -> Varchar,
+        desc -> Nullable<Varchar>,
         created_at -> Timestamp,
         updated_at -> Timestamp,
     }
@@ -54,6 +56,7 @@ diesel::table! {
         id -> Uuid,
         name -> Varchar,
         icon_url -> Nullable<Varchar>,
+        profile -> Nullable<Varchar>,
         created_at -> Timestamp,
         updated_at -> Timestamp,
     }
