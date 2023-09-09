@@ -71,7 +71,8 @@ struct TeamIdQuery {
 async fn create_user(req: HttpRequest, body: web::Json<CreateUserReqBody>) -> Result<HttpResponse, Error> {
     match auth::parse_token(req) {
         Some(token) => {
-            println!("token: {}", token);
+            let user_data = auth::verification(token).await;
+            println!("GitHub User Data: {:?}", user_data);
             return Ok(HttpResponse::Ok().content_type("text/html").body("0w0"))
         },
         None => return Ok(HttpResponse::Unauthorized().finish())

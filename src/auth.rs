@@ -1,9 +1,12 @@
 use actix_web::HttpRequest;
+use reqwest::header;
 use serde::Deserialize;
+use anyhow::{Result, Ok};
 
 #[derive(Debug, Deserialize)]
 pub struct GithubUserData {
-    pub name: String,
+    pub login: String,
+    pub avatar_url: String,
 }
 
 pub fn parse_token(req: HttpRequest) -> Option<String> {
@@ -20,17 +23,18 @@ pub fn parse_token(req: HttpRequest) -> Option<String> {
   };
 }
 
-// pub async fn verification(token: String) -> Result<GithubUserData> {
-//     let token = match request.headers().get("Authorization") {
-//         Some(token) => token.to_str().map_err(|_| anyhow!("Invalid header value"))?,
-//         None => return Err(anyhow!("Authorization header not found")),
-//     };
+pub async fn verification(token: String) -> Result<GithubUserData> {
+  let url = "https://api.github.com/user";
+  let mut custom_headers = header::HeaderMap::new();
+  custom_headers.insert(header::USER_AGENT, "HotchPotch".parse()?);
+  custom_headers.insert(header::AUTHORIZATION, format!("Bearer {}", token).parse()?);
 
-//     let url = format!("https://api.github.com/user?access_token={}", token);
-//     let response = reqwest::get(&url).await?;
-//     let response_text = response.text().await?;
-
-//     let github_user_data: GithubUserData = serde_json::from_str(&response_text)?;
-//     println!("GitHub User Data: {:?}", github_user_data);
-//     Ok(github_user_data)
-// }
+  let client = reqwest::Client::new();
+  let res = client.get(url)
+    .headers(custom_headers)
+    .send().await?
+    .text().await?;
+  
+  let user_data = serde_json::from_str(&res)?;
+  Ok(user_data)
+}
