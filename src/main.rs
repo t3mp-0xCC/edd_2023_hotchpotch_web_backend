@@ -7,6 +7,7 @@ use actix_web::middleware::Logger;
 use dotenv::dotenv;
 use env_logger::Env;
 
+mod cruds;
 mod db;
 mod models;
 mod router;
