@@ -68,7 +68,6 @@ async fn create_user(req: HttpRequest) -> Result<HttpResponse, Error> {
         Some(token) => {
             match auth::verification(token).await {
                 Ok(user_data) => {
-                    println!("GitHub User Data: {:?}", user_data);
                     let empty = String::new();
                     match cruds::create_user(&user_data.login, &user_data.avatar_url, &empty) {
                         Ok(_) => return Ok(HttpResponse::Created().content_type("text/html").body("0w0")),
@@ -94,8 +93,21 @@ async fn get_user(query: web::Query<UserIdQuery>) -> Result<HttpResponse, Error>
 }
 
 #[post("/api/events")]
-async fn create_event(body: web::Json<CreateEventReqBody>) -> Result<HttpResponse, Error> {
-    Ok(HttpResponse::Ok().content_type("text/html").body("0w0"))
+async fn create_event(req: HttpRequest , body: web::Json<CreateEventReqBody>) -> Result<HttpResponse, Error> {
+    match auth::parse_token(req) {
+        Some(token) => {
+            match auth::verification(token).await {
+                Ok(_) => {
+                    match cruds::create_event(&body.name, &body.desc, &body.url) {
+                        Ok(_) => return Ok(HttpResponse::Created().content_type("text/html").body("0w0")),
+                        Err(_) => return Ok(HttpResponse::InternalServerError().finish())
+                    };
+                },
+                Err(_) => return Ok(HttpResponse::Unauthorized().finish())
+            }
+        },
+        None => return Ok(HttpResponse::Unauthorized().finish())
+    };
 }
 
 #[get("/api/events")]
