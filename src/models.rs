@@ -46,7 +46,7 @@ pub struct  NewJoin<'a> {
 pub struct Request {
     pub team_id: Uuid,
     pub user_id: Uuid,
-    pub message: String,
+    pub message: Option<String>,
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
 }
@@ -64,8 +64,8 @@ pub struct  NewRequest<'a> {
 pub struct User {
     pub id: Uuid,
     pub name: String,
-    pub icon_url: String,
-    pub profile: String,
+    pub icon_url: Option<String>,
+    pub profile: Option<String>,
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
 }
@@ -74,8 +74,8 @@ pub struct User {
 #[diesel(table_name = users)]
 pub struct  NewUser<'a> {
     pub name: &'a String,
-    pub icon_url: &'a String,
-    pub profile: &'a String,
+    pub icon_url: &'a Option<String>,
+    pub profile: &'a Option<String>,
 }
 
 #[derive(Queryable, Serialize, Selectable, PartialEq, Debug, Clone)]
@@ -101,7 +101,7 @@ pub struct Team {
     pub event_id: Uuid,
     pub reader_id: Uuid,
     pub name: String,
-    pub desc: String,
+    pub desc: Option<String>,
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
 }
@@ -112,7 +112,7 @@ pub struct  NewTeam<'a> {
     pub event_id: &'a Uuid,
     pub reader_id: &'a Uuid,
     pub name: &'a String,
-    pub desc: &'a String,
+    pub desc: &'a Option<String>,
 }
 
 
