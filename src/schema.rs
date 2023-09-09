@@ -30,6 +30,15 @@ diesel::table! {
 }
 
 diesel::table! {
+    solos (event_id, user_id) {
+        event_id -> Uuid,
+        user_id -> Uuid,
+        created_at -> Timestamp,
+        updated_at -> Timestamp,
+    }
+}
+
+diesel::table! {
     teams (id) {
         id -> Uuid,
         event_id -> Uuid,
@@ -54,6 +63,8 @@ diesel::joinable!(joins -> teams (team_id));
 diesel::joinable!(joins -> users (user_id));
 diesel::joinable!(requests -> teams (team_id));
 diesel::joinable!(requests -> users (user_id));
+diesel::joinable!(solos -> events (event_id));
+diesel::joinable!(solos -> users (user_id));
 diesel::joinable!(teams -> events (event_id));
 diesel::joinable!(teams -> users (reader_id));
 
@@ -61,6 +72,7 @@ diesel::allow_tables_to_appear_in_same_query!(
     events,
     joins,
     requests,
+    solos,
     teams,
     users,
 );

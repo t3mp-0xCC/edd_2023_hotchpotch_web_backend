@@ -79,3 +79,20 @@ pub struct  NewUser<'a> {
     pub name: &'a String,
     pub icon_url: &'a String,
 }
+
+#[derive(Queryable, Serialize, Selectable, PartialEq, Debug, Clone)]
+#[diesel(table_name = solos)]
+pub struct solos {
+    pub event_id: Uuid,
+    pub user_id: Uuid,
+    pub created_at: NaiveDateTime,
+    pub updated_at: NaiveDateTime,
+}
+
+#[derive(Insertable)]
+#[diesel(table_name = solos)]
+pub struct  NewSolo<'a> {
+    pub event_id: &'a Uuid,
+    pub user_id: &'a Uuid,
+}
+
