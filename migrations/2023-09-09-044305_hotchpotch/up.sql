@@ -13,9 +13,9 @@ CREATE TABLE "users" (
 
 CREATE TABLE "events" (
   "id" Uuid PRIMARY KEY DEFAULT (uuid_generate_v4()),
-  "name" varchar(100) NOT NULL,
-  "desc" varchar(100),
-  "url" varchar(400),
+  "name" varchar NOT NULL,
+  "desc" varchar,
+  "url" varchar,
   "created_at" timestamp NOT NULL DEFAULT (now()),
   "updated_at" timestamp NOT NULL DEFAULT (now())
 );

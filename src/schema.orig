@@ -62,13 +62,6 @@ diesel::table! {
     }
 }
 
-diesel::table! {
-    hoge (id) {
-        id -> Uuid,
-        fuga -> Varchar,
-    }
-}
-
 diesel::joinable!(joins -> teams (team_id));
 diesel::joinable!(joins -> users (user_id));
 diesel::joinable!(requests -> teams (team_id));

@@ -6,7 +6,8 @@ use uuid::uuid;
 
 use crate::db::establish_connection;
 use crate::models::{self, Event, Join, Request, User, Solo, Team, NewEvent, NewJoin, NewRequest, NewUser, NewSolo, NewTeam};
-use crate::schema::{events, joins, requests, users, solos, teams};
+use crate::models::Hoge;
+use crate::schema::*;
 
 // Create
 pub fn create_event (
@@ -24,9 +25,17 @@ pub fn create_event (
 }
 
 pub fn create_join (
-    team_id: &Uuid,
-    user_id: &Uuid
+    team_id: &String,
+    user_id: &String
 ) -> anyhow::Result<()> {
+    let team_id = match &conv_string_to_uuid(team_id) {
+        Ok(u) => u,
+        Err(e) => return Err(anyhow!("{}", e)),
+    };
+    let user_id = match &conv_string_to_uuid(user_id) {
+        Ok(u) => u,
+        Err(e) => return Err(anyhow!("{}", e)),
+    };
     let conn = &mut establish_connection()?;
     let new_join = NewJoin{team_id, user_id};
     insert_into(joins::dsl::joins)
@@ -37,10 +46,19 @@ pub fn create_join (
 }
 
 pub fn create_request (
-    team_id: &Uuid,
-    user_id: &Uuid,
+    team_id: &String,
+    user_id: &String,
     message: &String
 ) -> anyhow::Result<()> {
+    let team_id = match &conv_string_to_uuid(team_id) {
+        Ok(u) => u,
+        Err(e) => return Err(anyhow!("{}", e)),
+    };
+    let user_id = match &conv_string_to_uuid(user_id) {
+        Ok(u) => u,
+        Err(e) => return Err(anyhow!("{}", e)),
+    };
+  
     let conn = &mut establish_connection()?;
     let new_request = NewRequest{team_id, user_id, message};
     insert_into(requests::dsl::requests)
@@ -65,9 +83,17 @@ pub fn create_user (
 }
 
 pub fn create_solo (
-    event_id: &Uuid,
-    user_id: &Uuid
+    event_id: &String,
+    user_id: &String
 ) -> anyhow::Result<()> {
+    let event_id = match &conv_string_to_uuid(event_id) {
+        Ok(u) => u,
+        Err(e) => return Err(anyhow!("{}", e)),
+    };
+    let user_id = match &conv_string_to_uuid(user_id) {
+        Ok(u) => u,
+        Err(e) => return Err(anyhow!("{}", e)),
+    };
     let conn = &mut establish_connection()?;
     let new_solo = NewSolo{event_id, user_id};
     insert_into(solos::dsl::solos)
@@ -78,11 +104,19 @@ pub fn create_solo (
 }
 
 pub fn create_team (
-    event_id: &Uuid,
-    reader_id: &Uuid,
+    event_id: &String,
+    reader_id: &String,
     name: &String,
     desc: &String
 ) -> anyhow::Result<()> {
+    let event_id = match &conv_string_to_uuid(event_id) {
+        Ok(u) => u,
+        Err(e) => return Err(anyhow!("{}", e)),
+    };
+    let reader_id = match &conv_string_to_uuid(reader_id) {
+        Ok(u) => u,
+        Err(e) => return Err(anyhow!("{}", e)),
+    };
     let conn = &mut establish_connection()?;
     let new_team = NewTeam{event_id, reader_id, name, desc};
     insert_into(teams::dsl::teams)
@@ -96,25 +130,31 @@ pub fn create_team (
 // Read
 
 // TODO: fix .load error
-/* pub fn get_event_list() -> anyhow::Result<Vec<Event>> {
-    let conn = &mut establish_connection()?;
-    let result = schema::events::dsl::events.select(Event::as_select()).load::<Event>(conn);
-} */
+pub fn get_event_list() -> Vec<Event> {
+    use crate::schema::events::dsl::events;
+    let conn = &mut establish_connection().unwrap();
+    events.select(Event::as_select()).first(conn).expect("Error getting new user")
+}
 
+pub fn get_hoge_list() -> Hoge {
+    use crate::schema::hoge::dsl::hoge;
+    let conn = &mut establish_connection().unwrap();
+    hoge.select(Hoge::as_select()).first(conn).expect("Error getting new user")
+} 
 // TODO: impl
-/* pub fn get_requests_from_user_id(id: &String) -> anyhow::Result<Vec<Request>> {
-    use crate::schema::requests::dsl::*;
+/* pub fn get_requests_from_user_id(user_id: &String) -> anyhow::Result<Vec<Request>> {
     let conn = &mut establish_connection()?;
-    let uuid: Uuid = match Uuid::parse_str(id) {
+    let user_id: Uuid = match Uuid::parse_str(user_id) {
         Ok(u) => u,
         Err(e) => return Err(anyhow!("{}", e)),
     };
-    match requests.filter(user_id.eq(uuid)).load::<Request>(conn) {
-        Ok(v) => return Ok(v),
-        Err(e) => return Err(anyhow!("{}", e))
-    }
-} */
 
+    let result = match requests::dsl::requests.load::<Request>(conn) {
+        Ok(r) => r,
+        Err(e) => return Err(anyhow!("{}", e)),
+    };
+} 
+*/
 // TODO: impl
 /* pub fn get_wanna_join_users_by_event_id() -> anyhow::Result<Vec<User>> {
     let conn = establish_connection()?;
@@ -131,4 +171,12 @@ pub fn delete_event_by_id(event_id: &Uuid) -> anyhow::Result<()> {
         .execute(conn)
         .with_context(|| "Failed to delete event")?;
     Ok(())
+}
+
+// Utils
+fn conv_string_to_uuid(str_uuid: &str) -> anyhow::Result<(Uuid)> {
+    match Uuid::parse_str(str_uuid) {
+        Ok(uuid) => return Ok(uuid),
+        Err(e) => return Err(anyhow!("{}", e)),
+    };
 }
