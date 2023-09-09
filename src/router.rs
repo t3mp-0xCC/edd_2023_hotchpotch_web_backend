@@ -190,8 +190,21 @@ async fn create_join(req: HttpRequest, body: web::Query<CreateJoinReqBody>) -> R
 }
 
 #[post("/api/requests")]
-async fn create_request(body: web::Json<CreateRequestReqBody>) -> Result<HttpResponse, Error> {
-    Ok(HttpResponse::Ok().content_type("text/html").body("0w0"))
+async fn create_request(req: HttpRequest, body: web::Json<CreateRequestReqBody>) -> Result<HttpResponse, Error> {
+    match auth::parse_token(req) {
+        Some(token) => {
+            match auth::verification(token).await {
+                Ok(user_data) => {
+                    match cruds::create_request(&body.team_id, &body.user_id, &body.message) {
+                        Ok(_) => return Ok(HttpResponse::Created().content_type("text/html").body("0w0")),
+                        Err(_) => return Ok(HttpResponse::InternalServerError().finish())
+                    };
+                },
+                Err(_) => return Ok(HttpResponse::Unauthorized().finish())
+            }
+        },
+        None => return Ok(HttpResponse::Unauthorized().finish())
+    };
 }
 
 #[get("/api/requests")]
