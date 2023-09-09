@@ -10,8 +10,6 @@ use uuid::Uuid;
 
 use crate::db::establish_connection;
 use crate::models::{self, Event, Join, Request, User, Solo, Team, NewEvent, NewJoin, NewRequest, NewUser, NewSolo, NewTeam};
-use crate::schema::solos::event_id;
-use crate::schema::teams::reader_id;
 use crate::schema::{self, events, joins, requests, users, solos, teams};
 
 // Create
@@ -91,7 +89,7 @@ pub fn create_team (
 ) -> anyhow::Result<()> {
     let conn = &mut establish_connection()?;
     let new_team = NewTeam{event_id, reader_id, name, desc};
-    insert_into(solos::dsl::solos)
+    insert_into(teams::dsl::teams)
         .values(&new_team)
         .execute(conn)
         .with_context(|| "Failed to insert new_team")?;
@@ -102,7 +100,7 @@ pub fn create_team (
 // Read
 
 // TODO: fix .load error
-pub fn get_event_list() -> anyhow::Result<Vec<Event>> {
+/* pub fn get_event_list() -> anyhow::Result<Vec<Event>> {
     use crate::schema::events::dsl::*;
     let conn = establish_connection()?;
     match events.load::<Event>(&mut conn) {
@@ -120,7 +118,7 @@ pub fn get_requests_for_user() -> anyhow::Result<Vec<Request> {
 pub fn get_wanna_join_users_by_event_id() -> anyhow::Result<Vec<User>> {
     let conn = establish_connection()?;
 }
-
+ */
 // Update
 
 // Delete
