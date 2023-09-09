@@ -3,8 +3,11 @@
 diesel::table! {
     events (id) {
         id -> Uuid,
+        #[max_length = 100]
         name -> Varchar,
+        #[max_length = 100]
         desc -> Nullable<Varchar>,
+        #[max_length = 400]
         url -> Nullable<Varchar>,
         created_at -> Timestamp,
         updated_at -> Timestamp,
@@ -24,6 +27,7 @@ diesel::table! {
     requests (team_id, user_id) {
         team_id -> Uuid,
         user_id -> Uuid,
+        #[max_length = 400]
         message -> Nullable<Varchar>,
         created_at -> Timestamp,
         updated_at -> Timestamp,
@@ -44,7 +48,9 @@ diesel::table! {
         id -> Uuid,
         event_id -> Uuid,
         reader_id -> Uuid,
+        #[max_length = 100]
         name -> Varchar,
+        #[max_length = 400]
         desc -> Nullable<Varchar>,
         created_at -> Timestamp,
         updated_at -> Timestamp,
@@ -54,8 +60,11 @@ diesel::table! {
 diesel::table! {
     users (id) {
         id -> Uuid,
+        #[max_length = 100]
         name -> Varchar,
+        #[max_length = 400]
         icon_url -> Nullable<Varchar>,
+        #[max_length = 400]
         profile -> Nullable<Varchar>,
         created_at -> Timestamp,
         updated_at -> Timestamp,

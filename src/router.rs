@@ -16,11 +16,6 @@ async fn index() -> Result<HttpResponse, Error> {
 
 // Structs
 #[derive(Deserialize)]
-struct CreateUserReqBody {
-    token: String
-}
-
-#[derive(Deserialize)]
 struct CreateEventReqBody {
     name: String,
     desc: String,
@@ -68,12 +63,20 @@ struct TeamIdQuery {
 
 // API
 #[post("/api/users")]
-async fn create_user(req: HttpRequest, body: web::Json<CreateUserReqBody>) -> Result<HttpResponse, Error> {
+async fn create_user(req: HttpRequest) -> Result<HttpResponse, Error> {
     match auth::parse_token(req) {
         Some(token) => {
-            let user_data = auth::verification(token).await;
-            println!("GitHub User Data: {:?}", user_data);
-            return Ok(HttpResponse::Ok().content_type("text/html").body("0w0"))
+            match auth::verification(token).await {
+                Ok(user_data) => {
+                    println!("GitHub User Data: {:?}", user_data);
+                    let empty = String::new();
+                    match cruds::create_user(&user_data.login, &user_data.avatar_url, &empty) {
+                        Ok(_) => return Ok(HttpResponse::Created().content_type("text/html").body("0w0")),
+                        Err(_) => return Ok(HttpResponse::InternalServerError().finish())
+                    };
+                },
+                Err(_) => return Ok(HttpResponse::InternalServerError().finish())
+            }
         },
         None => return Ok(HttpResponse::Unauthorized().finish())
     };
