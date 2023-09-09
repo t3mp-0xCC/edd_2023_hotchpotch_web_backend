@@ -1,16 +1,12 @@
 use anyhow::{anyhow, Context};
-use diesel::{
-    insert_into,
-    ExpressionMethods,
-    RunQueryDsl,
-    QueryDsl,
-    SelectableHelper,
-};
+use diesel::insert_into;
+use diesel::prelude::*;
 use uuid::Uuid;
+use uuid::uuid;
 
 use crate::db::establish_connection;
 use crate::models::{self, Event, Join, Request, User, Solo, Team, NewEvent, NewJoin, NewRequest, NewUser, NewSolo, NewTeam};
-use crate::schema::{self, events, joins, requests, users, solos, teams};
+use crate::schema::{events, joins, requests, users, solos, teams};
 
 // Create
 pub fn create_event (
@@ -101,24 +97,38 @@ pub fn create_team (
 
 // TODO: fix .load error
 /* pub fn get_event_list() -> anyhow::Result<Vec<Event>> {
-    use crate::schema::events::dsl::*;
-    let conn = establish_connection()?;
-    match events.load::<Event>(&mut conn) {
-        Ok(v) => return Ok(v),
+    let conn = &mut establish_connection()?;
+    let result = schema::events::dsl::events.select(Event::as_select()).load::<Event>(conn);
+} */
+
+// TODO: impl
+/* pub fn get_requests_from_user_id(id: &String) -> anyhow::Result<Vec<Request>> {
+    use crate::schema::requests::dsl::*;
+    let conn = &mut establish_connection()?;
+    let uuid: Uuid = match Uuid::parse_str(id) {
+        Ok(u) => u,
         Err(e) => return Err(anyhow!("{}", e)),
     };
-}
+    match requests.filter(user_id.eq(uuid)).load::<Request>(conn) {
+        Ok(v) => return Ok(v),
+        Err(e) => return Err(anyhow!("{}", e))
+    }
+} */
 
 // TODO: impl
-pub fn get_requests_for_user() -> anyhow::Result<Vec<Request> {
+/* pub fn get_wanna_join_users_by_event_id() -> anyhow::Result<Vec<User>> {
     let conn = establish_connection()?;
-}
-
-// TODO: impl
-pub fn get_wanna_join_users_by_event_id() -> anyhow::Result<Vec<User>> {
-    let conn = establish_connection()?;
-}
- */
+} */
+ 
 // Update
 
 // Delete
+pub fn delete_event_by_id(event_id: &Uuid) -> anyhow::Result<()> {
+    let conn = &mut establish_connection()?;
+    let target = events::dsl::events
+        .filter(events::dsl::id.eq(event_id));
+    diesel::delete(target)
+        .execute(conn)
+        .with_context(|| "Failed to delete event")?;
+    Ok(())
+}
