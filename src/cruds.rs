@@ -236,7 +236,12 @@ pub fn get_wanna_join_teams_by_event_id(event_id: &String) -> anyhow::Result<Vec
 // Update
 
 // Delete
-pub fn delete_event_by_id(event_id: &Uuid) -> anyhow::Result<()> {
+pub fn delete_event_by_id(event_id: &String) -> anyhow::Result<()> {
+    let binding = conv_string_to_uuid(event_id);
+    let event_id = match &binding {
+        Ok(u) => u,
+        Err(e) => return Err(anyhow!("{}", e)),
+    };
     let conn = &mut establish_connection()?;
     let target = events::dsl::events
         .filter(events::dsl::id.eq(event_id));
