@@ -226,8 +226,21 @@ async fn get_team(req: HttpRequest, query: web::Query<TeamIdQuery>) -> Result<Ht
 }
 
 #[get("/api/teams/event")]
-async fn get_team_by_event(query: web::Query<EventIdQuery>) -> Result<HttpResponse, Error> {
-    Ok(HttpResponse::Ok().content_type("text/html").body("0w0"))
+async fn get_team_by_event(req: HttpRequest, query: web::Query<EventIdQuery>) -> Result<HttpResponse, Error> {
+    match auth::parse_token(req) {
+        Some(token) => {
+            match auth::verification(token).await {
+                Ok(_) => {
+                    match cruds::get_wanna_join_teams_by_event_id(&query.event_id) {
+                        Ok(team_list) => return Ok(HttpResponse::Ok().content_type("text/html").json(team_list)),
+                        Err(_) => return Ok(HttpResponse::InternalServerError().finish())
+                    }
+                },
+                Err(_) => return Ok(HttpResponse::Unauthorized().finish())
+            }
+        },
+        None => return Ok(HttpResponse::Unauthorized().finish())
+    };
 }
 
 #[post("/api/joins")]
