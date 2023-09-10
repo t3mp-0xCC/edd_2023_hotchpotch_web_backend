@@ -5,6 +5,7 @@ use actix_web::{
     HttpResponse,
     HttpRequest,
 };
+use diesel::r2d2::event;
 use serde::Deserialize;
 
 use crate::{auth, cruds};
@@ -82,14 +83,33 @@ async fn create_user(req: HttpRequest) -> Result<HttpResponse, Error> {
 }
 
 #[get("api/users")]
-async fn get_user(query: web::Query<UserIdQuery>) -> Result<HttpResponse, Error> {
-    if query.user_id.is_none() {
-        // queryなし
-        return Ok(HttpResponse::Ok().content_type("text/html").body("0u0"));
-    } else {
-        // queryあり
-        return Ok(HttpResponse::Ok().content_type("text/html").body("0w0"))
-    }
+async fn get_user(req: HttpRequest, query: web::Query<UserIdQuery>) -> Result<HttpResponse, Error> {
+    match auth::parse_token(req) {
+        Some(token) => {
+            match auth::verification(token).await {
+                Ok(user_data) => {
+                    match query.user_id {
+                        // queryあり
+                        Some(user_id) => {
+                            match cruds::get_user_info_by_id(&user_id) {
+                                Ok(user) => return Ok(HttpResponse::Ok().content_type("text/html").json(user)),
+                                Err(_) => return Ok(HttpResponse::InternalServerError().finish())
+                            };
+                        },
+                        // queryなし
+                        None => {
+                            match cruds::get_user_info(&user_data.login) {
+                                Ok(user) => return Ok(HttpResponse::Ok().content_type("text/html").json(user)),
+                                Err(_) => return Ok(HttpResponse::InternalServerError().finish())
+                            };
+                        }
+                    };
+                },
+                Err(_) => return Ok(HttpResponse::Unauthorized().finish())
+            }
+        },
+        None => return Ok(HttpResponse::Unauthorized().finish())
+    };
 }
 
 #[post("/api/events")]
@@ -111,13 +131,39 @@ async fn create_event(req: HttpRequest, body: web::Json<CreateEventReqBody>) -> 
 }
 
 #[get("/api/events")]
-async fn get_event() -> Result<HttpResponse, Error> {
-    Ok(HttpResponse::Ok().content_type("text/html").body("0w0"))
+async fn get_event(req: HttpRequest) -> Result<HttpResponse, Error> {
+    match auth::parse_token(req) {
+        Some(token) => {
+            match auth::verification(token).await {
+                Ok(_) => {
+                    match cruds::get_event_list() {
+                        Ok(event_list) => return Ok(HttpResponse::Ok().content_type("text/html").json(event_list)),
+                        Err(_) => return Ok(HttpResponse::InternalServerError().finish())
+                    };
+                },
+                Err(_) => return Ok(HttpResponse::Unauthorized().finish())
+            }
+        },
+        None => return Ok(HttpResponse::Unauthorized().finish())
+    };
 }
 
 #[delete("/api/events")]
-async fn delete_event(query: web::Query<EventIdQuery>) -> Result<HttpResponse, Error> {
-    Ok(HttpResponse::Ok().content_type("text/html").body("0w0"))
+async fn delete_event(req: HttpRequest, query: web::Query<EventIdQuery>) -> Result<HttpResponse, Error> {
+    match auth::parse_token(req) {
+        Some(token) => {
+            match auth::verification(token).await {
+                Ok(_) => {
+                    match cruds::delete_event_by_id(&query.event_id) {
+                        Ok(_) => return Ok(HttpResponse::Created().content_type("text/html").body("0w0")),
+                        Err(_) => return Ok(HttpResponse::InternalServerError().finish())
+                    };
+                },
+                Err(_) => return Ok(HttpResponse::Unauthorized().finish())
+            }
+        },
+        None => return Ok(HttpResponse::Unauthorized().finish())
+    };
 }
 
 #[post("/api/solos")]
@@ -139,8 +185,21 @@ async fn create_solo(req: HttpRequest, body: web::Query<CreateSoloReqBody>) -> R
 }
 
 #[get("/api/solos")]
-async fn get_solo(query: web::Query<EventIdQuery>) -> Result<HttpResponse, Error> {
-    Ok(HttpResponse::Ok().content_type("text/html").body("0w0"))
+async fn get_solo(req: HttpRequest, query: web::Query<EventIdQuery>) -> Result<HttpResponse, Error> {
+    match auth::parse_token(req) {
+        Some(token) => {
+            match auth::verification(token).await {
+                Ok(_) => {
+                    match cruds::get_wanna_join_users_by_event_id(&query.event_id) {
+                        Ok(user_list) => return Ok(HttpResponse::Created().content_type("text/html").json(user_list)),
+                        Err(_) => return Ok(HttpResponse::InternalServerError().finish())
+                    };
+                },
+                Err(_) => return Ok(HttpResponse::Unauthorized().finish())
+            }
+        },
+        None => return Ok(HttpResponse::Unauthorized().finish())
+    };
 }
 
 #[post("/api/teams")]
@@ -162,13 +221,39 @@ async fn create_team(req: HttpRequest, body: web::Json<CreateTeamReqBody>) -> Re
 }
 
 #[get("/api/teams")]
-async fn get_team(query: web::Query<TeamIdQuery>) -> Result<HttpResponse, Error> {
-    Ok(HttpResponse::Ok().content_type("text/html").body("0w0"))
+async fn get_team(req: HttpRequest, query: web::Query<TeamIdQuery>) -> Result<HttpResponse, Error> {
+    match auth::parse_token(req) {
+        Some(token) => {
+            match auth::verification(token).await {
+                Ok(_) => {
+                    match cruds::get_team_info_by_id(&query.team_id) {
+                        Ok(team) => return Ok(HttpResponse::Ok().content_type("text/html").json(team)),
+                        Err(_) => return Ok(HttpResponse::InternalServerError().finish())
+                    }
+                },
+                Err(_) => return Ok(HttpResponse::Unauthorized().finish())
+            }
+        },
+        None => return Ok(HttpResponse::Unauthorized().finish())
+    };
 }
 
 #[get("/api/teams/event")]
-async fn get_team_by_event(query: web::Query<EventIdQuery>) -> Result<HttpResponse, Error> {
-    Ok(HttpResponse::Ok().content_type("text/html").body("0w0"))
+async fn get_team_by_event(req: HttpRequest, query: web::Query<EventIdQuery>) -> Result<HttpResponse, Error> {
+    match auth::parse_token(req) {
+        Some(token) => {
+            match auth::verification(token).await {
+                Ok(_) => {
+                    match cruds::get_wanna_join_teams_by_event_id(&query.event_id) {
+                        Ok(team_list) => return Ok(HttpResponse::Ok().content_type("text/html").json(team_list)),
+                        Err(_) => return Ok(HttpResponse::InternalServerError().finish())
+                    }
+                },
+                Err(_) => return Ok(HttpResponse::Unauthorized().finish())
+            }
+        },
+        None => return Ok(HttpResponse::Unauthorized().finish())
+    };
 }
 
 #[post("/api/joins")]
@@ -208,6 +293,19 @@ async fn create_request(req: HttpRequest, body: web::Json<CreateRequestReqBody>)
 }
 
 #[get("/api/requests")]
-async fn get_request() -> Result<HttpResponse, Error> {
-    Ok(HttpResponse::Ok().content_type("text/html").body("0w0"))
+async fn get_request(req: HttpRequest) -> Result<HttpResponse, Error> {
+    match auth::parse_token(req) {
+        Some(token) => {
+            match auth::verification(token).await {
+                Ok(user_data) => {
+                    match cruds::get_requests_from_user_id(&user_data.login) {
+                        Ok(request_list) => return Ok(HttpResponse::Ok().content_type("text/html").json(request_list)),
+                        Err(_) => return Ok(HttpResponse::InternalServerError().finish())
+                    };
+                },
+                Err(_) => return Ok(HttpResponse::Unauthorized().finish())
+            }
+        },
+        None => return Ok(HttpResponse::Unauthorized().finish())
+    };
 }
