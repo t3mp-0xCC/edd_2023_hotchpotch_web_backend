@@ -64,8 +64,8 @@ pub struct  NewRequest<'a> {
 pub struct User {
     pub id: Uuid,
     pub name: String,
-    pub icon_url: String,
-    pub profile: String,
+    pub icon_url: Option<String>,
+    pub profile: Option<String>,
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
 }
