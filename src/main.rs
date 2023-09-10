@@ -27,6 +27,7 @@ async fn main() -> std::io::Result<()> {
             .wrap(Logger::default())
             .service(router::index)
             .service(router::create_user)
+            .service(router::get_user)
             .service(router::create_event)
             .service(router::get_event)
             .service(router::create_solo)

@@ -83,14 +83,33 @@ async fn create_user(req: HttpRequest) -> Result<HttpResponse, Error> {
 }
 
 #[get("api/users")]
-async fn get_user(query: web::Query<UserIdQuery>) -> Result<HttpResponse, Error> {
-    if query.user_id.is_none() {
-        // queryなし
-        return Ok(HttpResponse::Ok().content_type("text/html").body("0u0"));
-    } else {
-        // queryあり
-        return Ok(HttpResponse::Ok().content_type("text/html").body("0w0"))
-    }
+async fn get_user(req: HttpRequest, query: web::Query<UserIdQuery>) -> Result<HttpResponse, Error> {
+    match auth::parse_token(req) {
+        Some(token) => {
+            match auth::verification(token).await {
+                Ok(user_data) => {
+                    match query.user_id {
+                        // queryあり
+                        Some(user_id) => {
+                            match cruds::get_user_info_by_id(&user_id) {
+                                Ok(user) => return Ok(HttpResponse::Ok().content_type("text/html").json(user)),
+                                Err(_) => return Ok(HttpResponse::InternalServerError().finish())
+                            };
+                        },
+                        // queryなし
+                        None => {
+                            match cruds::get_user_info(&user_data.login) {
+                                Ok(user) => return Ok(HttpResponse::Ok().content_type("text/html").json(user)),
+                                Err(_) => return Ok(HttpResponse::InternalServerError().finish())
+                            };
+                        }
+                    };
+                },
+                Err(_) => return Ok(HttpResponse::Unauthorized().finish())
+            }
+        },
+        None => return Ok(HttpResponse::Unauthorized().finish())
+    };
 }
 
 #[post("/api/events")]
