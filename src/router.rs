@@ -208,8 +208,21 @@ async fn create_team(req: HttpRequest, body: web::Json<CreateTeamReqBody>) -> Re
 }
 
 #[get("/api/teams")]
-async fn get_team(query: web::Query<TeamIdQuery>) -> Result<HttpResponse, Error> {
-    Ok(HttpResponse::Ok().content_type("text/html").body("0w0"))
+async fn get_team(req: HttpRequest, query: web::Query<TeamIdQuery>) -> Result<HttpResponse, Error> {
+    match auth::parse_token(req) {
+        Some(token) => {
+            match auth::verification(token).await {
+                Ok(_) => {
+                    match cruds::get_team_info_by_id(&query.team_id) {
+                        Ok(team) => return Ok(HttpResponse::Ok().content_type("text/html").json(team)),
+                        Err(_) => return Ok(HttpResponse::InternalServerError().finish())
+                    }
+                },
+                Err(_) => return Ok(HttpResponse::Unauthorized().finish())
+            }
+        },
+        None => return Ok(HttpResponse::Unauthorized().finish())
+    };
 }
 
 #[get("/api/teams/event")]

@@ -33,6 +33,7 @@ async fn main() -> std::io::Result<()> {
             .service(router::create_solo)
             .service(router::get_solo)
             .service(router::create_team)
+            .service(router::get_team)
             .service(router::create_join)
             .service(router::create_request)
             .service(router::get_request)
