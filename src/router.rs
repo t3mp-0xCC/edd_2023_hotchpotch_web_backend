@@ -222,6 +222,19 @@ async fn create_request(req: HttpRequest, body: web::Json<CreateRequestReqBody>)
 }
 
 #[get("/api/requests")]
-async fn get_request() -> Result<HttpResponse, Error> {
-    Ok(HttpResponse::Ok().content_type("text/html").body("0w0"))
+async fn get_request(req: HttpRequest) -> Result<HttpResponse, Error> {
+    match auth::parse_token(req) {
+        Some(token) => {
+            match auth::verification(token).await {
+                Ok(user_data) => {
+                    match cruds::get_requests_from_user_id(&user_data.login) {
+                        Ok(request_list) => return Ok(HttpResponse::Ok().content_type("text/html").json(request_list)),
+                        Err(_) => return Ok(HttpResponse::InternalServerError().finish())
+                    };
+                },
+                Err(_) => return Ok(HttpResponse::Unauthorized().finish())
+            }
+        },
+        None => return Ok(HttpResponse::Unauthorized().finish())
+    };
 }
