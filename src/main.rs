@@ -22,7 +22,7 @@ async fn main() -> std::io::Result<()> {
     dotenv().ok();
     HttpServer::new(||{
         let cors = Cors::default()
-            .allowed_origin("http://localhost:8080")
+            .allowed_origin("http://localhost:3000")
             .allowed_methods(vec!["GET", "POST", "DELETE"])
             .allowed_headers(vec![header::AUTHORIZATION, header::ACCEPT])
             .allowed_header(header::CONTENT_TYPE)
