@@ -2,6 +2,7 @@ use actix_cors::Cors;
 use actix_web::{
     App,
     HttpServer,
+    http::header,
 };
 use actix_web::middleware::Logger;
 use dotenv::dotenv;
@@ -20,7 +21,12 @@ async fn main() -> std::io::Result<()> {
     env_logger::init_from_env(Env::default().default_filter_or("debug"));
     dotenv().ok();
     HttpServer::new(||{
-        let cors = Cors::permissive()
+        let cors = Cors::default()
+            .allowed_origin("http://localhost:8080")
+            .allowed_methods(vec!["GET", "POST", "DELETE"])
+            .allowed_headers(vec![header::AUTHORIZATION, header::ACCEPT])
+            .allowed_header(header::CONTENT_TYPE)
+            .supports_credentials()
             .max_age(3600);
         App::new()
             .wrap(cors)
