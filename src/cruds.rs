@@ -27,11 +27,13 @@ pub fn create_join (
     team_id: &String,
     user_id: &String
 ) -> anyhow::Result<()> {
-    let team_id = match &conv_string_to_uuid(team_id) {
+    let binding = conv_string_to_uuid(team_id);
+    let team_id = match &binding {
         Ok(u) => u,
         Err(e) => return Err(anyhow!("{}", e)),
     };
-    let user_id = match &conv_string_to_uuid(user_id) {
+    let binding = conv_string_to_uuid(user_id);
+    let user_id = match &binding {
         Ok(u) => u,
         Err(e) => return Err(anyhow!("{}", e)),
     };
@@ -49,11 +51,13 @@ pub fn create_request (
     user_id: &String,
     message: &String
 ) -> anyhow::Result<()> {
-    let team_id = match &conv_string_to_uuid(team_id) {
+    let binding = conv_string_to_uuid(team_id);
+    let team_id = match &binding {
         Ok(u) => u,
         Err(e) => return Err(anyhow!("{}", e)),
     };
-    let user_id = match &conv_string_to_uuid(user_id) {
+    let binding = conv_string_to_uuid(user_id);
+    let user_id = match &binding {
         Ok(u) => u,
         Err(e) => return Err(anyhow!("{}", e)),
     };
@@ -85,11 +89,13 @@ pub fn create_solo (
     event_id: &String,
     user_id: &String
 ) -> anyhow::Result<()> {
-    let event_id = match &conv_string_to_uuid(event_id) {
+    let binding = conv_string_to_uuid(event_id);
+    let event_id = match &binding {
         Ok(u) => u,
         Err(e) => return Err(anyhow!("{}", e)),
     };
-    let user_id = match &conv_string_to_uuid(user_id) {
+    let binding = conv_string_to_uuid(user_id);
+    let user_id = match &binding {
         Ok(u) => u,
         Err(e) => return Err(anyhow!("{}", e)),
     };
@@ -110,12 +116,12 @@ pub fn create_team (
     desc: &String
 ) -> anyhow::Result<()> {
     let binding = conv_string_to_uuid(event_id);
-    let event_id = &binding {
+    let event_id = match &binding {
         Ok(u) => u,
         Err(e) => return Err(anyhow!("{}", e)),
     };
     let binding = conv_string_to_uuid(reader_id);
-    let reader_id = match &conv_string_to_uuid(reader_id) {
+    let reader_id = match &binding {
         Ok(u) => u,
         Err(e) => return Err(anyhow!("{}", e)),
     };
