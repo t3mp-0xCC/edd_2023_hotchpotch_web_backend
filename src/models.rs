@@ -4,22 +4,15 @@ use diesel_derives::Identifiable;
 use serde::Serialize;
 use uuid::Uuid;
 
-use crate::schema::{
-    events,
-    joins,
-    requests,
-    teams,
-    users,
-    solos,
-};
+use crate::schema::*;
 
 #[derive(Queryable, Serialize, Identifiable, Selectable, PartialEq, Debug, Clone)]
 #[diesel(table_name = events)]
 pub struct Event {
     pub id: Uuid,
     pub name: String,
-    pub desc: String,
-    pub url: String,
+    pub desc: Option<String>,
+    pub url: Option<String>,
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
 }
@@ -53,7 +46,7 @@ pub struct  NewJoin<'a> {
 pub struct Request {
     pub team_id: Uuid,
     pub user_id: Uuid,
-    pub message: String,
+    pub message: Option<String>,
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
 }
@@ -82,7 +75,7 @@ pub struct User {
 pub struct  NewUser<'a> {
     pub name: &'a String,
     pub icon_url: &'a String,
-    pub profile: &'a String,
+    pub profile: &'a String
 }
 
 #[derive(Queryable, Serialize, Selectable, PartialEq, Debug, Clone)]
@@ -108,7 +101,7 @@ pub struct Team {
     pub event_id: Uuid,
     pub reader_id: Uuid,
     pub name: String,
-    pub desc: String,
+    pub desc: Option<String>,
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
 }
@@ -121,5 +114,3 @@ pub struct  NewTeam<'a> {
     pub name: &'a String,
     pub desc: &'a String,
 }
-
-
