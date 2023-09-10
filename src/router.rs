@@ -5,6 +5,7 @@ use actix_web::{
     HttpResponse,
     HttpRequest,
 };
+use diesel::r2d2::event;
 use serde::Deserialize;
 
 use crate::{auth, cruds};
@@ -111,8 +112,21 @@ async fn create_event(req: HttpRequest, body: web::Json<CreateEventReqBody>) -> 
 }
 
 #[get("/api/events")]
-async fn get_event() -> Result<HttpResponse, Error> {
-    Ok(HttpResponse::Ok().content_type("text/html").body("0w0"))
+async fn get_event(req: HttpRequest) -> Result<HttpResponse, Error> {
+    match auth::parse_token(req) {
+        Some(token) => {
+            match auth::verification(token).await {
+                Ok(_) => {
+                    match cruds::get_event_list() {
+                        Ok(event_list) => return Ok(HttpResponse::Ok().content_type("text/html").json(event_list)),
+                        Err(_) => return Ok(HttpResponse::InternalServerError().finish())
+                    };
+                },
+                Err(_) => return Ok(HttpResponse::Unauthorized().finish())
+            }
+        },
+        None => return Ok(HttpResponse::Unauthorized().finish())
+    };
 }
 
 #[delete("/api/events")]

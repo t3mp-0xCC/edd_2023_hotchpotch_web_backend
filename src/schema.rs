@@ -3,11 +3,8 @@
 diesel::table! {
     events (id) {
         id -> Uuid,
-        #[max_length = 100]
         name -> Varchar,
-        #[max_length = 100]
         desc -> Nullable<Varchar>,
-        #[max_length = 400]
         url -> Nullable<Varchar>,
         created_at -> Timestamp,
         updated_at -> Timestamp,
@@ -68,13 +65,6 @@ diesel::table! {
         profile -> Nullable<Varchar>,
         created_at -> Timestamp,
         updated_at -> Timestamp,
-    }
-}
-
-diesel::table! {
-    hoge (id) {
-        id -> Uuid,
-        fuga -> Varchar,
     }
 }
 
