@@ -1,4 +1,5 @@
 use anyhow::{anyhow, Context};
+use diesel::dsl::any;
 use diesel::insert_into;
 use diesel::prelude::*;
 use uuid::Uuid;
@@ -152,33 +153,86 @@ pub fn get_requests_from_user_id(user_id: &String) -> anyhow::Result<Vec<Request
         Err(e) => return Err(anyhow!("{}", e)),
     };
 
-    match requests::dsl::requests.load::<Request>(conn) {
+    match requests::dsl::requests.filter(requests::dsl::user_id.eq(user_id)).load::<Request>(conn) {
         Ok(r) => return Ok(r),
         Err(e) => return Err(anyhow!("{}", e)),
     };
 } 
 
 // TODO: impl these
-/* pub fn get_wanna_join_users_by_event_id() -> anyhow::Result<Vec<User>> {
-    let conn = establish_connection()?;
+pub fn get_wanna_join_users_by_event_id(event_id: &String) -> anyhow::Result<Vec<User>> {
+    let conn = &mut establish_connection()?;
+    let event_id: Uuid = match Uuid::parse_str(event_id) {
+        Ok(u) => u,
+        Err(e) => return Err(anyhow!("{}", e)),
+    };
+    let solo_vec: Vec<Solo> = match solos::dsl::solos
+            .filter(solos::dsl::event_id.eq(event_id))
+            .load::<Solo>(conn) {
+        Ok(r) => r,
+        Err(e) => return Err(anyhow!("{}", e)),
+    };
+    let mut result: Vec<User> = vec![];
+    // Unpack vector
+    for s in solo_vec {
+        result.push(match search_user_by_id(s.user_id){
+            Ok(u) => u,
+            Err(e) => return Err(anyhow!("{}", e)),
+        });
+    }
+
+    return Ok(result);
 } 
 
-pub fn get_user_info(user_name: &String) -> anyhow::Result<User> {
 
+pub fn get_user_info_by_name(user_name: &String) -> anyhow::Result<User> {
+    let conn = &mut establish_connection()?;
+    match search_user_by_name(user_name) {
+        Ok(u) => return Ok(u),
+        Err(e) => Err(anyhow!("{}", e)),
+    }
 }
 
 pub fn get_user_info_by_id(user_id: &String) -> anyhow::Result<User> {
-
+    let conn = &mut establish_connection()?;
+    let binding = conv_string_to_uuid(user_id);
+    let user_id = match binding {
+        Ok(u) => u,
+        Err(e) => return Err(anyhow!("{}", e)),
+    };
+    match search_user_by_id(user_id) {
+        Ok(u) => return Ok(u),
+        Err(e) => Err(anyhow!("{}", e)),
+    }
 }
 
 pub fn get_team_info_by_id(team_id: &String) -> anyhow::Result<Team> {
-
+    let conn = &mut establish_connection()?;
+    let binding = conv_string_to_uuid(team_id);
+    let team_id = match binding {
+        Ok(u) => u,
+        Err(e) => return Err(anyhow!("{}", e)),
+    };
+    match search_team_by_id(team_id) {
+        Ok(u) => return Ok(u),
+        Err(e) => Err(anyhow!("{}", e)),
+    }
 }
 
 pub fn get_wanna_join_teams_by_event_id(event_id: &String) -> anyhow::Result<Vec<Team>> {
-
+    let conn = &mut establish_connection()?;
+    let event_id: Uuid = match Uuid::parse_str(event_id) {
+        Ok(u) => u,
+        Err(e) => return Err(anyhow!("{}", e)),
+    };
+    let team_vec: Vec<Team> = match teams::dsl::teams
+            .filter(teams::dsl::event_id.eq(event_id))
+            .load::<Team>(conn) {
+        Ok(v) => return Ok(v),
+        Err(e) => return Err(anyhow!("{}", e)),
+    };
 }
- */
+ 
 // Update
 
 // Delete
@@ -190,6 +244,52 @@ pub fn delete_event_by_id(event_id: &Uuid) -> anyhow::Result<()> {
         .execute(conn)
         .with_context(|| "Failed to delete event")?;
     Ok(())
+}
+
+// Search
+fn search_event_by_id(event_id: Uuid) -> anyhow::Result<Event> {
+    let conn = &mut establish_connection()?;
+    match events::dsl::events
+        .filter(events::dsl::id.eq(event_id))
+        .limit(1)
+        .first::<Event>(conn) {
+        Ok(v) => return Ok(v),
+        Err(e) => return Err(anyhow!("{}", e)),
+    }
+}
+
+fn search_team_by_id(team_id: Uuid) -> anyhow::Result<Team> {
+    let conn = &mut establish_connection()?;
+    match teams::dsl::teams
+        .filter(teams::dsl::id.eq(team_id))
+        .limit(1)
+        .first::<Team>(conn) {
+        Ok(v) => return Ok(v),
+        Err(e) => return Err(anyhow!("{}", e)),
+    }
+}
+
+
+fn search_user_by_name(name: &String) -> anyhow::Result<User> {
+    let conn = &mut establish_connection()?;
+    match users::dsl::users
+        .filter(users::dsl::name.eq(name))
+        .limit(1)
+        .first::<User>(conn) {
+        Ok(v) => return Ok(v),
+        Err(e) => return Err(anyhow!("{}", e)),
+    }
+}
+
+fn search_user_by_id(id: Uuid) -> anyhow::Result<User> {
+    let conn = &mut establish_connection()?;
+    match users::dsl::users
+        .filter(users::dsl::id.eq(id))
+        .limit(1)
+        .first::<User>(conn) {
+        Ok(v) => return Ok(v),
+        Err(e) => return Err(anyhow!("{}", e)),
+    }
 }
 
 // Utils
