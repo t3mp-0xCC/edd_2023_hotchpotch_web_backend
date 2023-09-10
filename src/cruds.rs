@@ -159,7 +159,6 @@ pub fn get_requests_from_user_id(user_id: &String) -> anyhow::Result<Vec<Request
     };
 } 
 
-// TODO: impl these
 pub fn get_wanna_join_users_by_event_id(event_id: &String) -> anyhow::Result<Vec<User>> {
     let conn = &mut establish_connection()?;
     let event_id: Uuid = match Uuid::parse_str(event_id) {
@@ -182,6 +181,7 @@ pub fn get_wanna_join_users_by_event_id(event_id: &String) -> anyhow::Result<Vec
     }
 
     return Ok(result);
+
 } 
 
 

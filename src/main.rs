@@ -7,6 +7,7 @@ use actix_web::middleware::Logger;
 use dotenv::dotenv;
 use env_logger::Env;
 
+mod auth;
 mod cruds;
 mod db;
 mod models;
@@ -25,6 +26,19 @@ async fn main() -> std::io::Result<()> {
             .wrap(cors)
             .wrap(Logger::default())
             .service(router::index)
+            .service(router::create_user)
+            .service(router::get_user)
+            .service(router::create_event)
+            .service(router::get_event)
+            .service(router::delete_event)
+            .service(router::create_solo)
+            .service(router::get_solo)
+            .service(router::create_team)
+            .service(router::get_team)
+            .service(router::get_team_by_event)
+            .service(router::create_join)
+            .service(router::create_request)
+            .service(router::get_request)
     })
     .bind(("127.0.0.1", 8080))?
     .run()
