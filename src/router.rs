@@ -149,8 +149,21 @@ async fn get_event(req: HttpRequest) -> Result<HttpResponse, Error> {
 }
 
 #[delete("/api/events")]
-async fn delete_event(query: web::Query<EventIdQuery>) -> Result<HttpResponse, Error> {
-    Ok(HttpResponse::Ok().content_type("text/html").body("0w0"))
+async fn delete_event(req: HttpRequest, query: web::Query<EventIdQuery>) -> Result<HttpResponse, Error> {
+    match auth::parse_token(req) {
+        Some(token) => {
+            match auth::verification(token).await {
+                Ok(_) => {
+                    match cruds::delete_event_by_id(&query.event_id) {
+                        Ok(_) => return Ok(HttpResponse::Created().content_type("text/html").body("0w0")),
+                        Err(_) => return Ok(HttpResponse::InternalServerError().finish())
+                    };
+                },
+                Err(_) => return Ok(HttpResponse::Unauthorized().finish())
+            }
+        },
+        None => return Ok(HttpResponse::Unauthorized().finish())
+    };
 }
 
 #[post("/api/solos")]
