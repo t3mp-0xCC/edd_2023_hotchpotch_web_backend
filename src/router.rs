@@ -88,7 +88,7 @@ async fn get_user(req: HttpRequest, query: web::Query<UserIdQuery>) -> Result<Ht
         Some(token) => {
             match auth::verification(token).await {
                 Ok(user_data) => {
-                    match query.user_id {
+                    match &query.user_id {
                         // queryあり
                         Some(user_id) => {
                             match cruds::get_user_info_by_id(&user_id) {
@@ -98,7 +98,7 @@ async fn get_user(req: HttpRequest, query: web::Query<UserIdQuery>) -> Result<Ht
                         },
                         // queryなし
                         None => {
-                            match cruds::get_user_info(&user_data.login) {
+                            match cruds::get_user_info_by_id(&user_data.login) {
                                 Ok(user) => return Ok(HttpResponse::Ok().content_type("text/html").json(user)),
                                 Err(_) => return Ok(HttpResponse::InternalServerError().finish())
                             };
